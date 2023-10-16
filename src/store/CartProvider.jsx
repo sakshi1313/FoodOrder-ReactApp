@@ -29,6 +29,13 @@ const cartReducer = (state, action) => {
     const updatedTotalAmount =
       state.totalAmount + action.item.price * action.item.amount;
 
+    // addToUserCart(
+    //   action.item.id,
+    //   action.item.amount,
+    //   action.item.price,
+    //   action.item.name
+    // );
+
     return {
       items: updatedItems,
       totalAmount: updatedTotalAmount,
@@ -58,6 +65,58 @@ const cartReducer = (state, action) => {
   return defaultCartState;
 };
 
+// // Function to add the item to the user's cart in the database
+const addToUserCart = async (productId, quantity, price, name) => {
+  const res = await fetch("/api/cart", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      productId: productId,
+      quantity: quantity,
+      name: name,
+      price: price,
+    }),
+  });
+  // console.log(res);
+
+  const data = await res.json();
+  if (res.status == 200) {
+    console.log("Item added to cart:", data);
+    window.alert("Item added to cart");
+  } else {
+    console.error("Failed to add item to cart");
+  }
+};
+
+const removeFromUserCart = async (productId) => {
+  try {
+    const res = await fetch(`/api/cart/${productId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (res.status === 200) {
+      const data = await res.json();
+      console.log("Item removed from cart:", data);
+      window.alert("Item removed from the cart");
+    } else {
+      console.error("Failed to remove item from cart");
+    }
+  } catch (error) {
+    console.error("Error removing item from cart:", error);
+  }
+};
+
+// In your component, dispatch the "REMOVE" action and call removeFromUserCart
+// to remove the item from the database when the "REMOVE" button is pressed.
+
 export default function CartProvider(props) {
   // -------------REDUCER --------------------
   const [cartState, dispatchCartAction] = useReducer(
@@ -66,9 +125,11 @@ export default function CartProvider(props) {
   );
   const addItemtoCartHandler = (item) => {
     dispatchCartAction({ type: "ADD", item: item });
+    addToUserCart(item.id, item.amount, item.price, item.name);
   };
   const removeItemFromCartHandler = (id) => {
     dispatchCartAction({ type: "REMOVE", id: id });
+    removeFromUserCart(id);
   };
 
   const cartContext = {

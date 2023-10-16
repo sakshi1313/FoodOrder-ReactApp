@@ -3,8 +3,11 @@ import classes from "./Cart.module.css";
 import Modal from "../UI/Modal";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export default function Cart(props) {
+  const navigateTo = useNavigate();
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
@@ -15,8 +18,8 @@ export default function Cart(props) {
     cartCtx.removeItem(id);
   };
 
-  const cartItemAddHandler = (item) => {
-    cartCtx.addItem({ ...item, amount: 1 });
+  const cartItemAddHandler = async (item) => {
+    cartCtx.addItem({ ...item, amount: 1 }); // updating the context
   };
 
   const cartItems = (
@@ -33,15 +36,23 @@ export default function Cart(props) {
       ))}
     </ul>
   );
+
+  const closeCartAndNavigateToMeals = () => {
+    props.onClose();
+    navigateTo("/menu");
+  };
   return (
-    <Modal onClose={props.onClose}>
+    <Modal onClose={closeCartAndNavigateToMeals}>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
       <div className={classes.actions}>
-        <button className={classes["button--alt"]} onClick={props.onClose}>
+        <button
+          className={classes["button--alt"]}
+          onClick={closeCartAndNavigateToMeals}
+        >
           Close
         </button>
         {hasItems && <button className={classes.button}>Order</button>}

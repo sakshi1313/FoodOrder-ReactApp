@@ -14,6 +14,8 @@ export default function MealItem(props) {
       amount: amount,
       price: props.price,
     });
+
+    console.log(cartCtx);
   };
   return (
     <li className={classes.meal}>
